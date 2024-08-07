@@ -1,19 +1,38 @@
 
+# Tidy up seq levels
+#' @importFrom GenomeInfoDb keepStandardChromosomes 'seqlevelsStyle<-' 
+#'  keepSeqlevels genomeStyles
+tidySeqLevels <- function(x, species, seqLevels, pruning.mode='tidy') {
+    if (!is.null(species) && species %in% names(genomeStyles())) {
+        out <- keepStandardChromosomes(
+            x = x,
+            species = species,
+            pruning.mode = pruning.mode
+        )
+    } else if (is.null(seqLevels)) {
+        out <- keepStandardChromosomes(
+            x = x,
+            pruning.mode = pruning.mode
+        )
+    } else {
+        out <- keepSeqlevels(
+            x = x,
+            value = seqLevels,
+            pruning.mode = pruning.mode
+        )
+    }
+    try(GenomeInfoDb::seqlevelsStyle(out) <- 'UCSC', silent = TRUE)
+    return(out)
+}
+
 # Get the transcript ranges with metadata and transcript lengths
-#' @importFrom GenomeInfoDb keepStandardChromosomes 'seqlevelsStyle<-'
 #' @importFrom GenomicFeatures transcripts
-getTranscriptRanges <- function(txdb, species = 'Homo_sapiens') {
+getTranscriptRanges <- function(txdb, species = 'Homo_sapiens', seqLevels = NULL) {
     # Retrieve transcript ranges with detailed metadata
     transcriptRanges <- transcripts(txdb, columns = 
                             c('TXID', 'TXSTART', 'TXEND', 'GENEID', 'TXNAME'))
     names(transcriptRanges) <- transcriptRanges$TXNAME
-    transcriptRanges <- 
-        tryCatch(keepStandardChromosomes(x = transcriptRanges, 
-                                        species = species, 
-                                        pruning.mode = "tidy"), 
-                error = function(cond) keepStandardChromosomes(transcriptRanges,
-                                        pruning.mode = "tidy"))
-    GenomeInfoDb::seqlevelsStyle(transcriptRanges) <- 'UCSC'
+    transcriptRanges <- tidySeqLevels(transcriptRanges, species, seqLevels)
     return(transcriptRanges)
 }
 
@@ -23,7 +42,7 @@ getTranscriptRanges <- function(txdb, species = 'Homo_sapiens') {
 getTssRanges <- function(transcriptRanges) {
     # Annotate transcription start sites (TSSs) with ids
     tssCoordinates <- promoters(transcriptRanges, upstream = 0, downstream = 1)
-    seqlevelsStyle(tssCoordinates) <- 'UCSC'
+    try(seqlevelsStyle(tssCoordinates) <- 'UCSC', silent = TRUE)
     tssCoordinates.unique <- unique(tssCoordinates)
     tssCoordinates.unique$tssId <- paste0('tss.',
                                         seq_len(length(tssCoordinates.unique)))
@@ -39,15 +58,9 @@ getTssRanges <- function(transcriptRanges) {
 #' @importFrom GenomeInfoDb keepStandardChromosomes
 #' @importFrom GenomeInfoDb 'seqlevelsStyle<-'
 #' @importFrom GenomicFeatures exonsBy
-getExonRangesByTx <- function(txdb, species = 'Homo_sapiens') {
+getExonRangesByTx <- function(txdb, species = 'Homo_sapiens', seqLevels = NULL) {
     exonRangesByTx <- exonsBy(txdb, by = 'tx', use.names = TRUE)
-    exonRangesByTx <- 
-        tryCatch(keepStandardChromosomes(x = exonRangesByTx, 
-                                        species = species, 
-                                        pruning.mode = "tidy"), 
-                error = function(cond) keepStandardChromosomes(exonRangesByTx,
-                                        pruning.mode = "tidy"))
-    seqlevelsStyle(exonRangesByTx) <- 'UCSC'
+    exonRangesByTx <- tidySeqLevels(exonRangesByTx, species, seqLevels)
     return(exonRangesByTx)
 }
 
@@ -95,16 +108,10 @@ getReducedExonRanges <- function(exonRanges.firstExon,
 #' @importFrom GenomeInfoDb keepStandardChromosomes 'seqlevelsStyle<-'
 #' @importFrom GenomicFeatures intronsByTranscript
 getIntronRangesByTx <- function(txdb, transcriptRanges, 
-                                species = 'Homo_sapiens') {
+                                species = 'Homo_sapiens', seqLevels = NULL) {
     # Retrieve intron ranges for each promoter
     intronRangesByTx <- intronsByTranscript(txdb, use.names = TRUE)
-    intronRangesByTx <- 
-        tryCatch(keepStandardChromosomes(x = intronRangesByTx, 
-                                        species = species, 
-                                        pruning.mode = "tidy"), 
-                error = function(cond) keepStandardChromosomes(intronRangesByTx,
-                                        pruning.mode = "tidy"))
-    seqlevelsStyle(intronRangesByTx) <- 'UCSC'
+    intronRangesByTx <- tidySeqLevels(intronRangesByTx, species, seqLevels)
     intronRangesByTx <- intronRangesByTx[names(transcriptRanges)]
     return(intronRangesByTx)
 }

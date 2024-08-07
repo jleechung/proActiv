@@ -73,31 +73,31 @@ S4 class for promoter annotation data for a specific annotation version
 }
 \section{Functions}{
 \itemize{
-\item \code{intronRanges}: Getter for intronRanges
+\item \code{intronRanges()}: Getter for intronRanges
 
-\item \code{intronRanges,PromoterAnnotation-method}: Getter for intronRanges
+\item \code{intronRanges(PromoterAnnotation)}: Getter for intronRanges
 
-\item \code{promoterIdMapping}: Getter for promoterIdMapping
+\item \code{promoterIdMapping()}: Getter for promoterIdMapping
 
-\item \code{promoterIdMapping,PromoterAnnotation-method}: Getter for promoterIdMapping
+\item \code{promoterIdMapping(PromoterAnnotation)}: Getter for promoterIdMapping
 
-\item \code{promoterCoordinates}: Getter for promoterCoordinates
+\item \code{promoterCoordinates()}: Getter for promoterCoordinates
 
-\item \code{promoterCoordinates,PromoterAnnotation-method}: Getter for promoterCoordinates
+\item \code{promoterCoordinates(PromoterAnnotation)}: Getter for promoterCoordinates
 
-\item \code{intronRanges<-}: Setter for intronRanges
+\item \code{intronRanges(x) <- value}: Setter for intronRanges
 
-\item \code{intronRanges<-,PromoterAnnotation-method}: Setter for intronRanges
+\item \code{intronRanges(PromoterAnnotation) <- value}: Setter for intronRanges
 
-\item \code{promoterIdMapping<-}: Setter for promoterIdMapping
+\item \code{promoterIdMapping(x) <- value}: Setter for promoterIdMapping
 
-\item \code{promoterIdMapping<-,PromoterAnnotation-method}: Setter for promoterIdMapping
+\item \code{promoterIdMapping(PromoterAnnotation) <- value}: Setter for promoterIdMapping
 
-\item \code{promoterCoordinates<-}: Setter for promoterCoordinates
+\item \code{promoterCoordinates(x) <- value}: Setter for promoterCoordinates
 
-\item \code{promoterCoordinates<-,PromoterAnnotation-method}: Setter for promoterCoordinates
+\item \code{promoterCoordinates(PromoterAnnotation) <- value}: Setter for promoterCoordinates
+
 }}
-
 \section{Slots}{
 
 \describe{

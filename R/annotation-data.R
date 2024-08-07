@@ -9,6 +9,8 @@
 #' @param species A character object. The genus and species of the organism to
 #'   be used in keepStandardChromosomes(). Supported species can be seen with
 #'   names(genomeStyles()).
+#' @param seqLevels A character object. The sequence levels (i.e. chromosome 
+#'   names) to keep. 
 #'
 #' @return A PromoterAnnotation object. The annotated
 #'   intron ranges, promoter coordinates and the promoter id mapping are
@@ -27,14 +29,14 @@
 #' @importFrom GenomicFeatures promoters 
 #' @importFrom GenomicRanges width resize end
 #' @importFrom S4Vectors 'mcols<-'
-preparePromoterAnnotation <- function(txdb, file, species) {
+preparePromoterAnnotation <- function(txdb, file, species = NULL, seqLevels = NULL) {
     txdb <- parseTxdb(txdb, file, species)
     promoterAnnotation <- PromoterAnnotation()
     
     ### Reduce first exons to identify transcripts belonging to each promoter 
     message('Extract exons by transcripts...')
-    transcriptRanges <- getTranscriptRanges(txdb, species) 
-    exonRangesByTx <- getExonRangesByTx(txdb, species = species) 
+    transcriptRanges <- getTranscriptRanges(txdb, species, seqLevels) 
+    exonRangesByTx <- getExonRangesByTx(txdb, species, seqLevels) 
     transcriptRanges$TxWidth <- vapply(width(exonRangesByTx), 
                                         FUN = sum, FUN.VALUE = numeric(1)) 
     
@@ -74,7 +76,7 @@ preparePromoterAnnotation <- function(txdb, file, species) {
     
     ### Prepare the annotated intron ranges to be used as input for junction read counting ###
     message('Prepare annotated intron ranges...')
-    intronRangesByTx <- getIntronRangesByTx(txdb, transcriptRanges, species) 
+    intronRangesByTx <- getIntronRangesByTx(txdb, transcriptRanges, species, seqLevels) 
     intronRangesByTx.unlist <- unlist(intronRangesByTx)
     intronRanges.unique <- getUniqueIntronRanges(intronRangesByTx.unlist) 
     

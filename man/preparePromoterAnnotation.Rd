@@ -4,7 +4,7 @@
 \alias{preparePromoterAnnotation}
 \title{Prepares promoter annotation from a gtf or txdb}
 \usage{
-preparePromoterAnnotation(txdb, file, species)
+preparePromoterAnnotation(txdb, file, species = NULL, seqLevels = NULL)
 }
 \arguments{
 \item{txdb}{A txdb object. The txdb of the annotation version for which
@@ -18,6 +18,9 @@ or `file` argument must be specified, but not both.}
 \item{species}{A character object. The genus and species of the organism to
 be used in keepStandardChromosomes(). Supported species can be seen with
 names(genomeStyles()).}
+
+\item{seqLevels}{A character object. The sequence levels (i.e. chromosome 
+names) to keep.}
 }
 \value{
 A PromoterAnnotation object. The annotated

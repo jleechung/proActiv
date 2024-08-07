@@ -15,7 +15,7 @@
 #' 
 #' @importFrom GenomicAlignments readTopHatJunctions readSTARJunctions 
 #'   readGAlignments summarizeJunctions
-#' @importFrom GenomeInfoDb seqlevelsStyle keepStandardChromosomes
+#' @importFrom GenomeInfoDb seqlevelsStyle keepStandardChromosomes keepSeqlevels seqlevels
 #' @importFrom GenomicRanges findOverlaps 'strand<-' 
 #' @importFrom S4Vectors queryHits subjectHits
 calculateJunctionReadCounts <- function(promoterCoordinates, intronRanges, 
@@ -23,27 +23,32 @@ calculateJunctionReadCounts <- function(promoterCoordinates, intronRanges,
     if(fileType == 'tophat') {
         message(paste0('Processing: ', file))
         junctionTable <- GenomicAlignments::readTopHatJunctions(file)
-        GenomeInfoDb::seqlevelsStyle(junctionTable) <- 'UCSC'
+        try(GenomeInfoDb::seqlevelsStyle(junctionTable) <- 'UCSC', silent = TRUE)
         message('File loaded into memory')
     } else if(fileType == 'star') {
         message(paste0('Processing: ', file))
         junctionTable <- GenomicAlignments::readSTARJunctions(file)
-        GenomeInfoDb::seqlevelsStyle(junctionTable) <- 'UCSC'
+        try(GenomeInfoDb::seqlevelsStyle(junctionTable) <- 'UCSC', silent = TRUE)
         junctionTable$score <- junctionTable$um_reads  
         message('File loaded into memory')
     } else if (fileType == 'bam') {
         message(paste0('Processing: ', file))
+        seqLevels <- seqlevels(promoterCoordinates)
         rawBam <- GenomicAlignments::readGAlignments(file)
-        bam <- GenomeInfoDb::keepStandardChromosomes(rawBam, 
-                                                     pruning.mode = 'coarse')
-        GenomeInfoDb::seqlevelsStyle(bam) <- 'UCSC'
+        # bam <- GenomeInfoDb::keepStandardChromosomes(
+        #     rawBam, pruning.mode = 'coarse')
+        bam <- GenomeInfoDb::keepSeqlevels(
+            rawBam, value = seqLevels, pruning.mode = 'coarse')
+        try(GenomeInfoDb::seqlevelsStyle(bam) <- 'UCSC', silent = TRUE)
         rm(rawBam)
         gc()
         junctions <- GenomicAlignments::summarizeJunctions(bam, genome = genome)
         rm(bam)
         gc()
-        junctionTable <- GenomeInfoDb::keepStandardChromosomes(junctions, 
-                                                    pruning.mode = 'coarse')
+        # junctionTable <- GenomeInfoDb::keepStandardChromosomes(junctions, 
+        #                                             pruning.mode = 'coarse')
+        junctionTable <- GenomeInfoDb::keepSeqlevels(
+            junctions, value = seqLevels, pruning.mode = 'coarse')
         strand(junctionTable) <- junctionTable$intron_strand
         junctionTable <- junctionTable[,c('score')]
         message('Junctions extracted from BAM file')
